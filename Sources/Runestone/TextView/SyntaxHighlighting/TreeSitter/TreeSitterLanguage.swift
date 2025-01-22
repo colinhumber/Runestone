@@ -8,7 +8,7 @@ import TreeSitter
 /// Refer to <doc:AddingATreeSitterLanguage> for more information on adding a Tree-sitter language to your project.
 public final class TreeSitterLanguage {
     /// Reference to the raw Tree-sitter language.
-    public let languagePointer: UnsafePointer<TSLanguage>
+    public let languagePointer: OpaquePointer
     /// Query used for syntax highlighting.
     public let highlightsQuery: TreeSitterLanguage.Query?
     /// Query used for detecting injected languages.
@@ -34,7 +34,7 @@ public final class TreeSitterLanguage {
     ///   - highlightsQuery: Query used for syntax highlighting.
     ///   - injectionsQuery: Query used for detecting injected languages.
     ///   - indentationScopes: Rules used for indenting text.
-    public init(_ language: UnsafePointer<TSLanguage>,
+    public init(_ language: OpaquePointer,
                 highlightsQuery: TreeSitterLanguage.Query? = nil,
                 injectionsQuery: TreeSitterLanguage.Query? = nil,
                 indentationScopes: TreeSitterIndentationScopes? = nil) {
@@ -87,13 +87,14 @@ private extension TreeSitterInternalLanguage {
     convenience init(_ language: TreeSitterLanguage) {
         let highlightsQuery = Self.makeInternalQuery(from: language.highlightsQuery, with: language.languagePointer)
         let injectionsQuery = Self.makeInternalQuery(from: language.injectionsQuery, with: language.languagePointer)
+      
         self.init(languagePointer: language.languagePointer,
                   highlightsQuery: highlightsQuery,
                   injectionsQuery: injectionsQuery,
                   indentationScopes: language.indentationScopes)
     }
 
-    private static func makeInternalQuery(from query: TreeSitterLanguage.Query?, with language: UnsafePointer<TSLanguage>) -> TreeSitterQuery? {
+    private static func makeInternalQuery(from query: TreeSitterLanguage.Query?, with language: OpaquePointer) -> TreeSitterQuery? {
         if let string = query?.string {
             do {
                 return try TreeSitterQuery(source: string, language: language)
